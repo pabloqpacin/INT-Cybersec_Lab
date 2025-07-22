@@ -1,6 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# https://portal.cloud.hashicorp.com/vagrant/discover/kalilinux/rolling
+# https://www.kali.org/blog/announcing-kali-for-vagrant/
+# https://bugs.kali.org/view.php?id=7885
+
 cluster = {
   "soc-vagrant-vm" => { :ip => "192.168.1.231", :cpus => 4, :mem => 8192 },
 }
@@ -9,7 +13,9 @@ groups = {
 }
 
 Vagrant.configure("2") do |config|
-    config.vm.box = "generic/debian12"
+  # FIXME: use 2025.2.0 or more recent version asap (atm they fail as per ./inop.kalilinux_rolling.txt)
+    config.vm.box = "kalilinux/rolling"
+    config.vm.box_version = "2022.3.2"
     cluster.each do |name, data|
       config.vm.define name do |host|
         host.vm.hostname = name
@@ -17,11 +23,18 @@ Vagrant.configure("2") do |config|
         host.vm.provider :virtualbox do |vb, override|
           vb.cpus = data[:cpus]
           vb.memory = data[:mem]
+          # Enable GUI
+          vb.gui = true
+          # Enable 3D acceleration for better GUI performance
+          vb.customize ["modifyvm", :id, "--vram", "128"]
+          vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
         end
       end
     end
     config.vm.provision "shell", inline: <<-SHELL
     sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+    echo 'APT::Get::Show-Versions "true";' | sudo tee /etc/apt/apt.conf.d/99show-versions
+    sudo apt-get update # TODO: solve GPG error, or install a newer version ay!
     SHELL
     # config.vm.provision "ansible" do |ansible|
     #   ansible.compatibility_mode = "2.0"
