@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+cluster = {
+  "soc-vagrant-vm" => { :ip => "192.168.1.231", :cpus => 4, :mem => 8192 },
+}
+groups = {
+  "remote" => ["soc-vagrant-vm"],
+}
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "generic/debian12"
+    cluster.each do |name, data|
+      config.vm.define name do |host|
+        host.vm.hostname = name
+        host.vm.network "public_network", ip: data[:ip], bridge: "enp4s0"
+        host.vm.provider :virtualbox do |vb, override|
+          vb.cpus = data[:cpus]
+          vb.memory = data[:mem]
+        end
+      end
+    end
+    config.vm.provision "shell", inline: <<-SHELL
+    sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+    SHELL
+    # config.vm.provision "ansible" do |ansible|
+    #   ansible.compatibility_mode = "2.0"
+    #   ansible.playbook = "playbook.yaml"
+    #   ansible.groups = groups
+    # end
+  end
+
