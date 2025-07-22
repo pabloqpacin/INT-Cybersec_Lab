@@ -1,0 +1,44 @@
+$ vagrant up
+    # ...
+    soc-vagrant-vm: Get:1 http://kali.download/kali kali-rolling InRelease [41.5 kB]
+    soc-vagrant-vm: Err:1 http://kali.download/kali kali-rolling InRelease
+    soc-vagrant-vm:   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY ED65462EC8D5E4C5
+    soc-vagrant-vm: Fetched 41.5 kB in 1s (60.6 kB/s)
+    soc-vagrant-vm: Reading package lists...
+    soc-vagrant-vm: W: An error occurred during the signature verification. The repository is not updated and the previous index files will be used. GPG error: http://kal
+i.download/kali kali-rolling InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY ED65462EC8D5E4C5
+    soc-vagrant-vm: W: Failed to fetch http://http.kali.org/kali/dists/kali-rolling/InRelease  The following signatures couldn't be verified because the public key is not
+ available: NO_PUBKEY ED65462EC8D5E4C5
+    soc-vagrant-vm: W: Some index files failed to download. They have been ignored, or old ones used instead.
+    soc-vagrant-vm: Reading package lists...
+    soc-vagrant-vm: Building dependency tree...
+    soc-vagrant-vm: Reading state information...
+    soc-vagrant-vm: kali-desktop-xfce is already the newest version (2022.4.3).
+    soc-vagrant-vm: 0 upgraded, 0 newly installed, 0 to remove and 15 not upgraded.
+    soc-vagrant-vm: Created symlink /etc/systemd/system/default.target → /lib/systemd/system/graphical.target.
+
+---
+
+# ──(vagrant㉿soc-vagrant-vm)-[~]
+# └─$ sudo apt update
+# Get:1 http://kali.download/kali kali-rolling InRelease [41.5 kB]
+# Err:1 http://kali.download/kali kali-rolling InRelease
+#   The following signatures couldn't be verified because the public key is not available: NO_PUBKEY ED65462EC8D5E4C5
+# Reading package lists... Done
+# Building dependency tree... Done
+# Reading state information... Done
+# 15 packages can be upgraded. Run 'apt list --upgradable' to see them.
+# W: An error occurred during the signature verification. The repository is not updated and the previous index files will be used. GPG error: http://kali.download/kali kali-rolling InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY ED65462EC8D5E4C5
+# W: Failed to fetch http://http.kali.org/kali/dists/kali-rolling/InRelease  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY ED65462EC8D5E4C5
+# W: Some index files failed to download. They have been ignored, or old ones used instead.
+
+---
+
+```sh
+# TODO: use a more recent version to avoid this costly upgrade (time & compute)
+wget -q -O - https://archive.kali.org/archive-key.asc | sudo apt-key add -
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ED65462EC8D5E4C5
+sudo apt update && sudo apt upgrade -y
+```
+
+

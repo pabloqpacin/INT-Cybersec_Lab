@@ -32,9 +32,23 @@ Vagrant.configure("2") do |config|
       end
     end
     config.vm.provision "shell", inline: <<-SHELL
-    sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+
+    # Tweak apt to be more verbose
     echo 'APT::Get::Show-Versions "true";' | sudo tee /etc/apt/apt.conf.d/99show-versions
-    sudo apt-get update # TODO: solve GPG error, or install a newer version ay!
+
+    # Set Spanish timezone and keyboard layout
+    sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+    sudo sed -i 's/XKBLAYOUT="us"/XKBLAYOUT="es"/' /etc/default/keyboard
+    sudo setupcon      # loads console map
+    sudo udevadm trigger --subsystem-match=input --action=change   # reloads X11 maps
+
+    # FIXME: use a more recent version to avoid this costly upgrade (see ./fixme.kali_2022.3.2_GPG.txt)
+    wget -q -O - https://archive.kali.org/archive-key.asc | sudo apt-key add -
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ED65462EC8D5E4C5
+    sudo apt update && sudo apt upgrade -y
+
+    # Reiniciar la máquina
+    sudo reboot
     SHELL
     # config.vm.provision "ansible" do |ansible|
     #   ansible.compatibility_mode = "2.0"
