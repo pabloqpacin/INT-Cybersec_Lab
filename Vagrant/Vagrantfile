@@ -13,9 +13,8 @@ groups = {
 }
 
 Vagrant.configure("2") do |config|
-  # FIXME: use 2025.2.0 or more recent version asap (atm they fail as per ./inop.kalilinux_rolling.txt)
     config.vm.box = "kalilinux/rolling"
-    config.vm.box_version = "2022.3.2"
+    config.vm.box_version = "2025.2.1"    # https://portal.cloud.hashicorp.com/vagrant/discover/kalilinux/rolling/versions
     cluster.each do |name, data|
       config.vm.define name do |host|
         host.vm.hostname = name
@@ -33,22 +32,25 @@ Vagrant.configure("2") do |config|
     end
     config.vm.provision "shell", inline: <<-SHELL
 
-    # Tweak apt to be more verbose
-    echo 'APT::Get::Show-Versions "true";' | sudo tee /etc/apt/apt.conf.d/99show-versions
+      # Tweak apt to be more verbose
+      echo 'APT::Get::Show-Versions "true";' | sudo tee /etc/apt/apt.conf.d/99show-versions
 
-    # Set Spanish timezone and keyboard layout
-    sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-    sudo sed -i 's/XKBLAYOUT="us"/XKBLAYOUT="es"/' /etc/default/keyboard
-    sudo setupcon      # loads console map
-    sudo udevadm trigger --subsystem-match=input --action=change   # reloads X11 maps
+      # Set Spanish timezone and keyboard layout
+      sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+      sudo sed -i 's/XKBLAYOUT="us"/XKBLAYOUT="es"/' /etc/default/keyboard
 
-    # FIXME: use a more recent version to avoid this costly upgrade (see ./fixme.kali_2022.3.2_GPG.txt)
-    wget -q -O - https://archive.kali.org/archive-key.asc | sudo apt-key add -
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ED65462EC8D5E4C5
-    sudo apt update && sudo apt upgrade -y
+      # Install some key packages
+      sudo apt-get update
+      # sudo apt-get upgrade -y
+      sudo apt-get install -y bat jq lf ripgrep
+      sudo ln -s /usr/bin/batcat /usr/bin/bat
 
-    # Reiniciar la máquina
-    sudo reboot
+      # # Tweak zsh
+      # sed -i 's/^PROMPT_ALTERNATIVE=twoline/PROMPT_ALTERNATIVE=oneline/' ~/.zshrc
+
+      # Reboot the machine
+      sudo reboot
+
     SHELL
     # config.vm.provision "ansible" do |ansible|
     #   ansible.compatibility_mode = "2.0"
