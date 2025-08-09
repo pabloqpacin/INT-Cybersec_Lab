@@ -45,8 +45,8 @@ Vagrant.configure("2") do |config|
       sudo apt-get install -y bat jq lf ripgrep
       sudo ln -s /usr/bin/batcat /usr/bin/bat
 
-      # # Tweak zsh
-      # sed -i 's/^PROMPT_ALTERNATIVE=twoline/PROMPT_ALTERNATIVE=oneline/' ~/.zshrc
+      # Tweak zsh
+      sed -i 's/^PROMPT_ALTERNATIVE=twoline/PROMPT_ALTERNATIVE=oneline/' /home/vagrant/.zshrc
 
       # Reboot the machine
       sudo reboot
