@@ -1,6 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# https://portal.cloud.hashicorp.com/vagrant/discover/kalilinux/rolling
+# https://www.kali.org/blog/announcing-kali-for-vagrant/
+# https://bugs.kali.org/view.php?id=7885
+
 cluster = {
   "soc-vagrant-vm" => { :ip => "192.168.1.231", :cpus => 4, :mem => 8192 },
 }
@@ -9,7 +13,8 @@ groups = {
 }
 
 Vagrant.configure("2") do |config|
-    config.vm.box = "generic/debian12"
+    config.vm.box = "kalilinux/rolling"
+    config.vm.box_version = "2025.2.1"    # https://portal.cloud.hashicorp.com/vagrant/discover/kalilinux/rolling/versions
     cluster.each do |name, data|
       config.vm.define name do |host|
         host.vm.hostname = name
@@ -17,11 +22,35 @@ Vagrant.configure("2") do |config|
         host.vm.provider :virtualbox do |vb, override|
           vb.cpus = data[:cpus]
           vb.memory = data[:mem]
+          # Enable GUI
+          vb.gui = true
+          # Enable 3D acceleration for better GUI performance
+          vb.customize ["modifyvm", :id, "--vram", "128"]
+          vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
         end
       end
     end
     config.vm.provision "shell", inline: <<-SHELL
-    sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+
+      # Tweak apt to be more verbose
+      echo 'APT::Get::Show-Versions "true";' | sudo tee /etc/apt/apt.conf.d/99show-versions
+
+      # Set Spanish timezone and keyboard layout
+      sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+      sudo sed -i 's/XKBLAYOUT="us"/XKBLAYOUT="es"/' /etc/default/keyboard
+
+      # Install some key packages
+      sudo apt-get update
+      # sudo apt-get upgrade -y
+      sudo apt-get install -y bat jq lf ripgrep
+      sudo ln -s /usr/bin/batcat /usr/bin/bat
+
+      # Tweak zsh
+      sed -i 's/^PROMPT_ALTERNATIVE=twoline/PROMPT_ALTERNATIVE=oneline/' /home/vagrant/.zshrc
+
+      # Reboot the machine
+      sudo reboot
+
     SHELL
     # config.vm.provision "ansible" do |ansible|
     #   ansible.compatibility_mode = "2.0"
