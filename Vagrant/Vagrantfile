@@ -10,12 +10,12 @@ cluster = {
   "kali-soc-vagrant-vm"   => {
     :box => "kalilinux/rolling", :box_version => "2025.2.1",
     :cpus => 4, :mem => 8192,
-    :ip => "192.168.1.231",
+    :ip => "172.26.10.11",
   },
   "debian-soc-vagrant-vm" => {
     :box => "generic/debian12",
     :cpus => 2, :mem => 4096,
-    :ip => "192.168.1.232",
+    :ip => "172.26.10.12",
   },
 }
 groups = {
@@ -28,7 +28,9 @@ Vagrant.configure("2") do |config|
       host.vm.box = data[:box]
       host.vm.box_version = data[:box_version] if data[:box_version]
       host.vm.hostname = name
-      host.vm.network "public_network", ip: data[:ip], bridge: "enp4s0"
+
+      # host.vm.network "public_network", ip: data[:ip], bridge: "enp4s0"
+      host.vm.network "private_network", ip: data[:ip]
 
       host.vm.provider :virtualbox do |vb, override|
         vb.cpus = data[:cpus]
