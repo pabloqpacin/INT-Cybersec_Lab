@@ -1,10 +1,16 @@
 ---
 
-- name: Tweak zsh prompt
+- name: Tweak zsh prompt (single line)
   replace:
     path: /home/vagrant/.zshrc
     regexp: '^PROMPT_ALTERNATIVE=twoline'
     replace: 'PROMPT_ALTERNATIVE=oneline'
+
+- name: Tweak zsh prompt (no newline)
+  replace:
+    path: /home/vagrant/.zshrc
+    regexp: '^NEWLINE_BEFORE_PROMPT=yes'
+    replace: 'NEWLINE_BEFORE_PROMPT=no'
 
 - name: Create kali-aliases.zsh file
   copy:
@@ -27,10 +33,12 @@
     mode: '0644'
 
 - name: Append kali-aliases.zsh source to .zshrc
-  lineinfile:
+  blockinfile:
     path: /home/vagrant/.zshrc
-    line: |
-
+    block: |
       # Custom Kali ZSH config
       source ~/kali-aliases.zsh
-    insertafter: EOF
+    marker: "{mark}"
+    marker_begin: "\n# BEGIN ANSIBLE MANAGED BLOCK - Custom ZSH aliases"
+    marker_end: "# END ANSIBLE MANAGED BLOCK - Custom ZSH aliases"
+    state: present

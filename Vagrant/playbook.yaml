@@ -23,7 +23,9 @@
           # Custom DNS entries for home-soc lab
           172.26.10.11 kali.local
           172.26.10.12 server.local
-        marker: "# {mark} ANSIBLE MANAGED BLOCK - Custom DNS"
+        marker: "{mark}"
+        marker_begin: "\n# BEGIN ANSIBLE MANAGED BLOCK - Custom DNS"
+        marker_end: "# END ANSIBLE MANAGED BLOCK - Custom DNS"
         state: present
 
 - name: Configure Kali Linux machines
