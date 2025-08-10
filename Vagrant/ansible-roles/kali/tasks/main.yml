@@ -1,0 +1,44 @@
+---
+- name: Set Spanish keyboard layout
+  replace:
+    path: /etc/default/keyboard
+    regexp: 'XKBLAYOUT="us"'
+    replace: 'XKBLAYOUT="es"'
+  register: keyboard_changed
+
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install key packages
+  apt:
+    name:
+      - bat
+      - jq
+      - lf
+      - ripgrep
+    state: present
+
+- name: Create bat symlink
+  file:
+    src: /usr/bin/batcat
+    dest: /usr/bin/bat
+    state: link
+    force: yes
+
+- name: Tweak zsh prompt
+  replace:
+    path: /home/vagrant/.zshrc
+    regexp: '^PROMPT_ALTERNATIVE=twoline'
+    replace: 'PROMPT_ALTERNATIVE=oneline'
+
+
+- name: Reboot machine
+  reboot:
+    msg: "Rebooting after keyboard layout change"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+  when: keyboard_changed.changed

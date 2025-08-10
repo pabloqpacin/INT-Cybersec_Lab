@@ -1,5 +1,28 @@
 ---
-- name: Install docker in servers
+- name: Apply common configuration to all machines
+  hosts: remote
+  become: true
+  tasks:
+    - name: Set Spanish timezone
+      file:
+        src: /usr/share/zoneinfo/Europe/Madrid
+        dest: /etc/localtime
+        state: link
+        force: true
+
+    - name: Configure apt to show versions
+      lineinfile:
+        path: /etc/apt/apt.conf.d/99show-versions
+        line: 'APT::Get::Show-Versions "true";'
+        create: true
+
+- name: Configure Kali Linux machines
+  hosts: kali
+  become: true
+  roles:
+    - kali
+
+- name: Configure Debian servers
   hosts: servers
   become: true
   roles:
