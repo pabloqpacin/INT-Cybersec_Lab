@@ -16,6 +16,16 @@
         line: 'APT::Get::Show-Versions "true";'
         create: true
 
+    - name: Configure /etc/hosts with custom DNS entries
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          # Custom DNS entries for home-soc lab
+          172.26.10.11 kali.local
+          172.26.10.12 server.local
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - Custom DNS"
+        state: present
+
 - name: Configure Kali Linux machines
   hosts: kali
   become: true
