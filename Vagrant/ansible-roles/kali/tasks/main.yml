@@ -1,0 +1,20 @@
+---
+- name: Set Spanish keyboard layout
+  replace:
+    path: /etc/default/keyboard
+    regexp: 'XKBLAYOUT="us"'
+    replace: 'XKBLAYOUT="es"'
+  register: keyboard_changed
+
+- ansible.builtin.include_tasks: 01-apt.yml
+- ansible.builtin.include_tasks: 02-dotfiles.yml
+- ansible.builtin.include_tasks: 03-zsh.yml
+
+- name: Reboot machine
+  reboot:
+    msg: "Rebooting after keyboard layout change"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+  when: keyboard_changed.changed

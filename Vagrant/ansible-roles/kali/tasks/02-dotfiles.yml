@@ -1,0 +1,47 @@
+---
+
+- name: Lock ~/dotfiles directory
+  ansible.builtin.stat:
+    path: /home/vagrant/dotfiles
+  register: dotfiles_dir
+
+- name: Clone dotfiles
+  ansible.builtin.git:
+    repo: https://github.com/pabloqpacin/dotfiles.git
+    dest: /home/vagrant/dotfiles
+    version: develop
+  when: not dotfiles_dir.stat.exists
+
+- name: Fix dotfiles directory ownership
+  file:
+    path: /home/vagrant/dotfiles
+    owner: vagrant
+    group: vagrant
+    recurse: yes
+
+- name: Ensure ~/.config exists
+  ansible.builtin.file:
+    path: /home/vagrant/.config
+    state: directory
+    mode: '0755'
+
+- name: Symlink bat, lf & tmux
+  ansible.builtin.file:
+    src: /home/vagrant/dotfiles/.config/{{ item }}
+    dest: /home/vagrant/.config/{{ item }}
+    state: link
+    force: no
+  loop:
+    - bat
+    - lf
+    - tmux
+
+- name: Symlink .vimrc
+  ansible.builtin.file:
+    src: /home/vagrant/dotfiles/.vimrc
+    dest: "{{ item }}/.vimrc"
+    state: link
+    force: no
+  loop:
+    - /home/vagrant
+    - /root
