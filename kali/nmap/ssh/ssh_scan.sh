@@ -6,6 +6,7 @@
 TARGET="server.local"
 OUTPUT_DIR="./results"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "🔍 Iniciando escaneo SSH de $TARGET..."
 echo "⏰ Timestamp: $TIMESTAMP"
@@ -15,20 +16,19 @@ echo ""
 mkdir -p "$OUTPUT_DIR"
 
 # 1. Escaneo básico de puertos SSH
-echo "📡 Escaneo básico de puertos SSH..."
+echo -e "\n📡 Escaneo básico de puertos SSH..."
 nmap -p 22 -sV -sC "$TARGET" -oN "$OUTPUT_DIR/ssh_basic_$TIMESTAMP.txt"
 
-# 2. Escaneo de versiones y scripts de vulnerabilidades SSH
-echo "🔐 Escaneo de vulnerabilidades SSH..."
-nmap -p 22 --script=ssh* "$TARGET" -oN "$OUTPUT_DIR/ssh_vulns_$TIMESTAMP.txt"
+# 2. Escaneo completo SSH + OS + scripts de vulnerabilidades
+echo -e "\n🔐 Escaneo completo SSH + OS + scripts..."
+nmap -p 22 -sV -sC -A --script=ssh* "$TARGET" -oN "$OUTPUT_DIR/ssh_complete_$TIMESTAMP.txt"
 
-# 3. Escaneo agresivo de SSH (más detallado)
-echo "⚡ Escaneo agresivo SSH..."
-nmap -p 22 -sV -sC -A --script=ssh* "$TARGET" -oN "$OUTPUT_DIR/ssh_aggressive_$TIMESTAMP.txt"
-
-# 4. Escaneo de fuerza bruta de usuarios SSH (opcional)
-echo "👥 Verificando usuarios SSH comunes..."
-nmap -p 22 --script=ssh-brute --script-args=userdb=./common_users.txt "$TARGET" -oN "$OUTPUT_DIR/ssh_users_$TIMESTAMP.txt" 2>/dev/null || echo "⚠️  Script de fuerza bruta no disponible o falló"
+# 3. Escaneo de fuerza bruta de usuarios SSH (opcional)
+echo -e "\n👥 Verificando usuarios SSH comunes..."
+nmap -p 22 --script ssh-brute \
+    --script-args userdb=${SCRIPT_DIR}/common_users.txt,passdb=${SCRIPT_DIR}/common_passwords.txt,ssh-brute.timeout=4s \
+    "$TARGET" -oN "$OUTPUT_DIR/ssh_users_$TIMESTAMP.txt" 2>/dev/null \
+    || echo "⚠️  Script de fuerza bruta no disponible o falló"
 
 echo ""
 echo "✅ Escaneo SSH completado!"
