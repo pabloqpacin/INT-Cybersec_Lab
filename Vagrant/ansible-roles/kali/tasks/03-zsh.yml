@@ -1,0 +1,36 @@
+---
+
+- name: Tweak zsh prompt
+  replace:
+    path: /home/vagrant/.zshrc
+    regexp: '^PROMPT_ALTERNATIVE=twoline'
+    replace: 'PROMPT_ALTERNATIVE=oneline'
+
+- name: Create kali-aliases.zsh file
+  copy:
+    dest: /home/vagrant/kali-aliases.zsh
+    content: |
+      ts () {
+        if [[ -z $1 ]] || [[ ${1:0:1} == '-' ]]
+        then
+          tmux new-session "$@"
+        else
+          tmux new-session -s "$@"
+        fi
+      }
+
+      tn () {
+        tmux new -s $(pwd | sed 's#.*/##')
+      }
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+
+- name: Append kali-aliases.zsh source to .zshrc
+  lineinfile:
+    path: /home/vagrant/.zshrc
+    line: |
+
+      # Custom Kali ZSH config
+      source ~/kali-aliases.zsh
+    insertafter: EOF

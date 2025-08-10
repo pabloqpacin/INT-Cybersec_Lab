@@ -5,57 +5,50 @@
 # https://www.kali.org/blog/announcing-kali-for-vagrant/
 # https://bugs.kali.org/view.php?id=7885
 
+
 cluster = {
-  "soc-vagrant-vm" => { :ip => "192.168.1.231", :cpus => 4, :mem => 8192 },
+  "kali-soc-vagrant-vm"   => {
+    :box => "kalilinux/rolling", :box_version => "2025.2.1",
+    :cpus => 4, :mem => 8192,
+    :ip => "172.26.10.11",
+  },
+  "debian-soc-vagrant-vm" => {
+    :box => "generic/debian12",
+    :cpus => 2, :mem => 4096,
+    :ip => "172.26.10.12",
+  },
 }
 groups = {
-  "remote" => ["soc-vagrant-vm"],
+  "remote" => cluster.keys,
+  "kali" => ["kali-soc-vagrant-vm"],
+  "servers" => ["debian-soc-vagrant-vm"],
 }
 
 Vagrant.configure("2") do |config|
-    config.vm.box = "kalilinux/rolling"
-    config.vm.box_version = "2025.2.1"    # https://portal.cloud.hashicorp.com/vagrant/discover/kalilinux/rolling/versions
-    cluster.each do |name, data|
-      config.vm.define name do |host|
-        host.vm.hostname = name
-        host.vm.network "public_network", ip: data[:ip], bridge: "enp4s0"
-        host.vm.provider :virtualbox do |vb, override|
-          vb.cpus = data[:cpus]
-          vb.memory = data[:mem]
-          # Enable GUI
+  cluster.each do |name, data|
+    config.vm.define name do |host|
+      host.vm.box = data[:box]
+      host.vm.box_version = data[:box_version] if data[:box_version]
+      host.vm.hostname = name
+      # host.vm.network "public_network", ip: data[:ip], bridge: "enp4s0"
+      host.vm.network "private_network", ip: data[:ip]
+      host.vm.provider :virtualbox do |vb, override|
+        vb.cpus = data[:cpus]
+        vb.memory = data[:mem]
+        if groups["kali"].include?(name)
           vb.gui = true
-          # Enable 3D acceleration for better GUI performance
           vb.customize ["modifyvm", :id, "--vram", "128"]
           vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
         end
       end
     end
-    config.vm.provision "shell", inline: <<-SHELL
-
-      # Tweak apt to be more verbose
-      echo 'APT::Get::Show-Versions "true";' | sudo tee /etc/apt/apt.conf.d/99show-versions
-
-      # Set Spanish timezone and keyboard layout
-      sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-      sudo sed -i 's/XKBLAYOUT="us"/XKBLAYOUT="es"/' /etc/default/keyboard
-
-      # Install some key packages
-      sudo apt-get update
-      # sudo apt-get upgrade -y
-      sudo apt-get install -y bat jq lf ripgrep
-      sudo ln -s /usr/bin/batcat /usr/bin/bat
-
-      # Tweak zsh
-      sed -i 's/^PROMPT_ALTERNATIVE=twoline/PROMPT_ALTERNATIVE=oneline/' /home/vagrant/.zshrc
-
-      # Reboot the machine
-      sudo reboot
-
-    SHELL
-    # config.vm.provision "ansible" do |ansible|
-    #   ansible.compatibility_mode = "2.0"
-    #   ansible.playbook = "playbook.yaml"
-    #   ansible.groups = groups
-    # end
   end
-
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   sudo ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+  # SHELL
+  config.vm.provision "ansible" do |ansible|
+    ansible.compatibility_mode = "2.0"
+    ansible.playbook = "playbook.yaml"
+    ansible.groups = groups
+  end
+end
