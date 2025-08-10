@@ -6,33 +6,9 @@
     replace: 'XKBLAYOUT="es"'
   register: keyboard_changed
 
-
-- name: Update apt cache
-  apt:
-    update_cache: yes
-
-- name: Install key packages
-  apt:
-    name:
-      - bat
-      - jq
-      - lf
-      - ripgrep
-    state: present
-
-- name: Create bat symlink
-  file:
-    src: /usr/bin/batcat
-    dest: /usr/bin/bat
-    state: link
-    force: yes
-
-- name: Tweak zsh prompt
-  replace:
-    path: /home/vagrant/.zshrc
-    regexp: '^PROMPT_ALTERNATIVE=twoline'
-    replace: 'PROMPT_ALTERNATIVE=oneline'
-
+- ansible.builtin.include_tasks: 01-apt.yml
+- ansible.builtin.include_tasks: 02-dotfiles.yml
+- ansible.builtin.include_tasks: 03-zsh.yml
 
 - name: Reboot machine
   reboot:

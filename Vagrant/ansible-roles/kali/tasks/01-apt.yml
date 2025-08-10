@@ -1,0 +1,22 @@
+---
+
+- name: Install key packages
+  apt:
+    update_cache: yes
+    name:
+      - bat
+      - eza
+      - fzf
+      - git-delta
+      - jq
+      - lf
+      - ripgrep
+      - tmux
+    state: present
+
+- name: Create bat symlink
+  file:
+    src: /usr/bin/batcat
+    dest: /usr/bin/bat
+    state: link
+    force: no
