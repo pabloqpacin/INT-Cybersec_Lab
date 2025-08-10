@@ -27,3 +27,4 @@
   become: true
   roles:
     - docker
+    - server

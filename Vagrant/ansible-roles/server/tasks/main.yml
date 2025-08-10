@@ -1,0 +1,15 @@
+---
+- name: Verificar si el contenedor Apache ya está ejecutándose
+  community.docker.docker_container_info:
+    name: apache1
+  register: apache_container_info
+
+- name: Ejecutar contenedor Apache si no existe
+  community.docker.docker_container:
+    name: apache1
+    image: httpd
+    state: started
+    ports:
+      - "80:80"
+    restart_policy: unless-stopped
+  when: apache_container_info.exists == false
