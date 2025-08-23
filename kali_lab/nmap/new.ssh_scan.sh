@@ -28,8 +28,7 @@ do_preparations() {
         echo "WARNING: ./target_list.txt not found. Using default target: scanme.nmap.org"
         TARGETS='scanme.nmap.org'
     fi
-    echo "Objetivos cargados: ${#TARGETS[@]}"
-    echo "Objetivos: ${TARGETS[*]}"
+    echo "Objetivos cargados: ${#TARGETS[@]} (${TARGETS[*]})"
 
     # Current timestamp for output file
     declare -g -a TIMESTAMP
@@ -53,16 +52,35 @@ ping_targets() {
     done
 }
 
+scan_port_22() {
+    declare -g -a IS_OPEN_PORT_22
+    declare -g -a IS_CLOSED_PORT_22
+    echo "Scanning port 22..."
+    for target in ${TARGETS[@]}; do
+        if nmap -p 22 --max-retries 2 "$target" | grep -q "22/tcp.*open"; then
+            IS_OPEN_PORT_22+=("$target")
+        else
+            IS_CLOSED_PORT_22+=("$target")
+        fi
+    done
+
+    echo "SSH is running on port 22 on ${#IS_OPEN_PORT_22[@]} targets (${IS_OPEN_PORT_22[*]})"
+    echo "SSH is NOT running on port 22 on ${#IS_CLOSED_PORT_22[@]} targets (${IS_CLOSED_PORT_22[*]})"
+}
+
+scan_all_ports_for_ssh() {
+
+}
+
+
 # ---
 
 if true; then
 
     do_preparations
-    ping_targets
-    # scan_port_22
-    # if [ $? -ne 0 ]; then
-    #     scan_all_ports
-    # fi
+    # ping_targets
+    scan_port_22
+    scan_all_ports_for_ssh
     # run_safe_scans
     # run_intrusive_scans
     # write_results
