@@ -1,0 +1,5 @@
+server.local
+# 172.26.10.12
+
+scanme.nmap.org
+
