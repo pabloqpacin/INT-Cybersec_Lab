@@ -43,9 +43,9 @@ Vagrant.configure("2") do |config|
         end
       end
       if groups["kali"].include?(name)
-        host.vm.synced_folder "../kali", "/lab"
+        host.vm.synced_folder "../kali_lab", "/lab"
       elsif groups["servers"].include?(name)
-        host.vm.synced_folder "../server", "/lab"
+        host.vm.synced_folder "../debian_server", "/lab"
       end
     end
   end
