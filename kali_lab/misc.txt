@@ -1,0 +1,10 @@
+
+# networking
+tcpdump
+wireshark/tshark
+
+# cracking
+johntheripper
+
+# wifi
+...
