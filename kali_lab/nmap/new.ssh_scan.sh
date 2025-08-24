@@ -30,35 +30,41 @@ do_preparations() {
     fi
     echo "Objetivos cargados: ${#TARGETS[@]} (${TARGETS[*]})"
 
-    # Current timestamp for output file
-    declare -g -a TIMESTAMP
-    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-    echo "Timestamp: $TIMESTAMP"
-
-    # Output directory
-    declare -g -a OUTPUT_DIR
+    # Output results
+    declare -a OUTPUT_DIR
+    declare -a TIMESTAMP
+    declare -g -a OUTPUT_FILE
     OUTPUT_DIR="./results"
-    echo "Results directory: $OUTPUT_DIR"
+    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+    OUTPUT_FILE="$OUTPUT_DIR/ssh_scan-$TIMESTAMP.log"
+    echo "Output file with results: $OUTPUT_FILE"
     mkdir -p $OUTPUT_DIR
 
-    # Spacing
-    echo "--------------------------------"
+    # Write header to output file
+    echo "=== SSH Scan Results - $(date) ===" > "$OUTPUT_FILE"
+    echo "Targets: ${TARGETS[*]}" >> "$OUTPUT_FILE"
+    echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
 
 ping_targets() {
     echo "= Pinging targets... ="
     for target in ${TARGETS[*]}; do
-        ping -c 1 $target
+        echo "Pinging $target..." | tee -a "$OUTPUT_FILE"
+        ping -c 1 $target 2>&1 | tee -a "$OUTPUT_FILE"
     done
+    echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
 
 scan_port_22() {
     declare -g -a IS_OPEN_PORT_22
     declare -g -a IS_CLOSED_PORT_22
     declare -g -A SSH_PORTS
-    echo "= Scanning port 22... ="
+    echo "Scanning port 22..."
     for target in ${TARGETS[@]}; do
-        if nmap -p 22 --max-retries 2 "$target" | grep -q "22/tcp.*open"; then
+        nmap_output=$(nmap -p 22 -sV --max-retries 2 "$target" 2>&1 | tee -a "$OUTPUT_FILE")
+        port_status=$(echo "$nmap_output" | grep "22/tcp")
+        [[ -n "$port_status" ]] && echo "- $target: $port_status"
+        if echo "$nmap_output" | grep -q "22/tcp.*open"; then
             IS_OPEN_PORT_22+=("$target")
             SSH_PORTS["$target"]=22
         else
@@ -68,27 +74,28 @@ scan_port_22() {
 
     echo "SSH is running on port 22 on ${#IS_OPEN_PORT_22[@]} targets (${IS_OPEN_PORT_22[*]})"
     echo "SSH is NOT running on port 22 on ${#IS_CLOSED_PORT_22[@]} targets (${IS_CLOSED_PORT_22[*]})"
-    echo "--------------------------------"
+    echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
 
+# NOTE: also scanning for versions (-sV)
 scan_all_ports_for_ssh() {
     declare -g -a SSH_ON_OTHER_PORTS
-    echo "= Scanning all ports for SSH service... ="
+    echo "Scanning all ports for SSH service..."
 
     for target in ${IS_CLOSED_PORT_22[@]}; do
-        echo "Scanning targets for SSH on any port... "
-        nmap_output=$(nmap -sV -p- --max-retries 2 "$target")
+        nmap_output=$(nmap -sV -p- --max-retries 2 "$target" 2>&1 | tee -a "$OUTPUT_FILE")
         if echo "$nmap_output" | grep -q "ssh\|SSH"; then
             SSH_ON_OTHER_PORTS+=("$target")
             port=$(echo "$nmap_output" | grep "ssh\|SSH" | head -1 | grep -o "[0-9]*/tcp" | cut -d'/' -f1)
             SSH_PORTS["$target"]="$port"
-            echo "  SSH found on $target (on port $port)"
+            ssh_port_status=$(echo "$nmap_output" | grep "ssh\|SSH" | head -1)
+            [[ -n "$ssh_port_status" ]] && echo "- $target: $ssh_port_status"
         else
-            echo "  no SSH found in default 1000 common ports (TODO: scan all ports with -p-)"
+            echo "- $target: no SSH found in any port (1-65535)"
         fi
     done
 
-    echo "--------------------------------"
+    echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
 
 print_ssh_port_mapping() {
@@ -98,6 +105,12 @@ print_ssh_port_mapping() {
     done
     echo "--------------------------------"
 }
+
+
+# -----------------------------------------------------------------------------
+# Now, if the safe scripts are ran by default, we don't need to run them again.
+# Therefore, we should have outputted said scans and the results innit.
+# -----------------------------------------------------------------------------
 
 
 # ---
