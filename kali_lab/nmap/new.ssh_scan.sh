@@ -46,7 +46,7 @@ do_preparations() {
 }
 
 ping_targets() {
-    echo "Pinging targets..."
+    echo "= Pinging targets... ="
     for target in ${TARGETS[*]}; do
         ping -c 1 $target
     done
@@ -55,10 +55,12 @@ ping_targets() {
 scan_port_22() {
     declare -g -a IS_OPEN_PORT_22
     declare -g -a IS_CLOSED_PORT_22
-    echo "Scanning port 22..."
+    declare -g -A SSH_PORTS
+    echo "= Scanning port 22... ="
     for target in ${TARGETS[@]}; do
         if nmap -p 22 --max-retries 2 "$target" | grep -q "22/tcp.*open"; then
             IS_OPEN_PORT_22+=("$target")
+            SSH_PORTS["$target"]=22
         else
             IS_CLOSED_PORT_22+=("$target")
         fi
@@ -66,10 +68,35 @@ scan_port_22() {
 
     echo "SSH is running on port 22 on ${#IS_OPEN_PORT_22[@]} targets (${IS_OPEN_PORT_22[*]})"
     echo "SSH is NOT running on port 22 on ${#IS_CLOSED_PORT_22[@]} targets (${IS_CLOSED_PORT_22[*]})"
+    echo "--------------------------------"
 }
 
 scan_all_ports_for_ssh() {
+    declare -g -a SSH_ON_OTHER_PORTS
+    echo "= Scanning all ports for SSH service... ="
 
+    for target in ${IS_CLOSED_PORT_22[@]}; do
+        echo "Scanning targets for SSH on any port... "
+        nmap_output=$(nmap -sV -p- --max-retries 2 "$target")
+        if echo "$nmap_output" | grep -q "ssh\|SSH"; then
+            SSH_ON_OTHER_PORTS+=("$target")
+            port=$(echo "$nmap_output" | grep "ssh\|SSH" | head -1 | grep -o "[0-9]*/tcp" | cut -d'/' -f1)
+            SSH_PORTS["$target"]="$port"
+            echo "  SSH found on $target (on port $port)"
+        else
+            echo "  no SSH found in default 1000 common ports (TODO: scan all ports with -p-)"
+        fi
+    done
+
+    echo "--------------------------------"
+}
+
+print_ssh_port_mapping() {
+    echo "SSH Port Mapping Summary:"
+    for target in "${!SSH_PORTS[@]}"; do
+        echo "  $target -> SSH on port ${SSH_PORTS[$target]}"
+    done
+    echo "--------------------------------"
 }
 
 
@@ -79,8 +106,11 @@ if true; then
 
     do_preparations
     # ping_targets
+
     scan_port_22
-    scan_all_ports_for_ssh
+    [[ ${#IS_CLOSED_PORT_22[@]} -gt 0 ]] && scan_all_ports_for_ssh
+    print_ssh_port_mapping
+
     # run_safe_scans
     # run_intrusive_scans
     # write_results
