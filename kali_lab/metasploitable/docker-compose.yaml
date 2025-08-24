@@ -6,6 +6,8 @@
 # $ docker run -it --network vulnhunters --ip 10.255.255.2 --name metasploitable --hostname metasploitable2  tleemcjr/metasploitable2 bash
 # $ { /bin/services.sh }
 
+# NOTE: via Ansible, network created and stack started.
+
 # ---
 
 services:
@@ -16,4 +18,11 @@ services:
     volumes:
       - ./tweaks.sh:/tmp/tweaks.sh
     entrypoint: ["/bin/bash", "/tmp/tweaks.sh"]
+    networks:
+      metasploitable_net:
+        ipv4_address: 172.26.10.13
+
+networks:
+  metasploitable_net:
+    external: true
 
