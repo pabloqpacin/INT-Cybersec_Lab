@@ -30,6 +30,22 @@ do_preparations() {
     fi
     echo "Objetivos cargados: ${#TARGETS[@]} (${TARGETS[*]})"
 
+    # Listas de usuarios y contraseñas
+    declare -g -a USERNAMES_LIST
+    declare -g -a PASSWORDS_LIST
+    if [[ -f "./common_users.txt" ]]; then
+        USERNAMES_LIST="./common_users.txt"
+    else
+        echo -e "WARNING: ./common_users.txt not found. Using default users: root, admin\n"
+        USERNAMES_LIST="root, admin"
+    fi
+    if [[ -f "./common_passwords.txt" ]]; then
+        PASSWORDS_LIST="./common_passwords.txt"
+    else
+        echo -e "WARNING: ./common_passwords.txt not found. Using default passwords: password123, password456\n"
+        PASSWORDS_LIST="password123, password, 1234"
+    fi
+
     # Output results
     declare -a OUTPUT_DIR
     declare -a TIMESTAMP
@@ -44,6 +60,12 @@ do_preparations() {
     echo "=== SSH Scan Results - $(date) ===" > "$OUTPUT_FILE"
     echo "Targets: ${TARGETS[*]}" >> "$OUTPUT_FILE"
     echo "--------------------------------" | tee -a "$OUTPUT_FILE"
+
+    # # Array global para categorizar los scripts de nmap
+    # declare -g -a SAFE_SCRIPTS
+    # declare -g -a INTRUSIVE_SCRIPTS
+    # SAFE_SCRIPTS=(ssh2-enum-algos ssh-hostkey)
+    # INTRUSIVE_SCRIPTS=(ssh-auth-methods ssh-brute ssh-publickey-acceptance ssh-run)
 }
 
 ping_targets() {
@@ -54,6 +76,7 @@ ping_targets() {
     done
     echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
+
 
 scan_port_22() {
     declare -g -a IS_OPEN_PORT_22
@@ -77,7 +100,6 @@ scan_port_22() {
     echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
 
-# NOTE: also scanning for versions (-sV)
 scan_all_ports_for_ssh() {
     declare -g -a SSH_ON_OTHER_PORTS
     echo "Scanning all ports for SSH service..."
@@ -107,10 +129,18 @@ print_ssh_port_mapping() {
 }
 
 
-# -----------------------------------------------------------------------------
-# Now, if the safe scripts are ran by default, we don't need to run them again.
-# Therefore, we should have outputted said scans and the results innit.
-# -----------------------------------------------------------------------------
+run_safe_scripts() {
+    echo "Running safe nmap scripts..."
+    for target in "${!SSH_PORTS[@]}"; do
+        port="${SSH_PORTS[$target]}"
+        nmap -p "$port" -sV --script=ssh-hostkey,ssh2-enum-algos --script-args=ssh-hostkey=all "$target" 2>&1 | tee -a "$OUTPUT_FILE"
+        echo "--------------------------------" | tee -a "$OUTPUT_FILE"
+    done
+}
+
+run_intrusive_scripts() {
+    echo "Running intrusive nmap scripts..."
+}
 
 
 # ---
@@ -124,8 +154,7 @@ if true; then
     [[ ${#IS_CLOSED_PORT_22[@]} -gt 0 ]] && scan_all_ports_for_ssh
     print_ssh_port_mapping
 
-    # run_safe_scans
-    # run_intrusive_scans
-    # write_results
+    run_safe_scripts
+    # run_intrusive_scripts
 
 fi
