@@ -134,12 +134,37 @@ run_safe_scripts() {
     for target in "${!SSH_PORTS[@]}"; do
         port="${SSH_PORTS[$target]}"
         nmap -p "$port" -sV --script=ssh-hostkey,ssh2-enum-algos --script-args=ssh-hostkey=all "$target" 2>&1 | tee -a "$OUTPUT_FILE"
-        echo "--------------------------------" | tee -a "$OUTPUT_FILE"
+        echo "  ----------------" | tee -a "$OUTPUT_FILE"
     done
+    echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
 
 run_intrusive_scripts() {
     echo "Running intrusive nmap scripts..."
+
+    for target in "${!SSH_PORTS[@]}"; do
+        port="${SSH_PORTS[$target]}"
+
+        # Escaneo de métodos de autenticación SSH
+        echo "  Checking SSH authentication methods on $target (port $port)..." | tee -a "$OUTPUT_FILE"
+        auth_scan_output=$(nmap -p "$port" -sV --script=ssh-auth-methods "$target" 2>&1 | tee -a "$OUTPUT_FILE")
+        echo "$auth_scan_output"
+
+        # Verificar si la autenticación por contraseña está habilitada
+        if echo "$auth_scan_output" | grep -q "password"; then
+            echo "  ✅ Password authentication enabled - running ssh-brute..." | tee -a "$OUTPUT_FILE"
+
+            # Escaneo de fuerza bruta SSH
+            nmap -p "$port" -sV --script=ssh-brute --script-args=userdb=./$USERNAMES_LIST,passdb=./$PASSWORDS_LIST,ssh-brute.timeout=10s "$target" 2>&1 | tee -a "$OUTPUT_FILE"
+        else
+            echo "  ❌ Password authentication disabled - skipping ssh-brute" | tee -a "$OUTPUT_FILE"
+            echo "  💡 SSH only accepts public key authentication" | tee -a "$OUTPUT_FILE"
+        fi
+
+        echo "  ----------------" | tee -a "$OUTPUT_FILE"
+    done
+
+    echo "--------------------------------" | tee -a "$OUTPUT_FILE"
 }
 
 
@@ -155,6 +180,6 @@ if true; then
     print_ssh_port_mapping
 
     run_safe_scripts
-    # run_intrusive_scripts
+    run_intrusive_scripts
 
 fi
