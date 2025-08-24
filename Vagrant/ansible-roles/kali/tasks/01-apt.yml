@@ -6,6 +6,8 @@
     name:
       - bat
       - eza
+      - docker.io
+      - docker-compose
       - fzf
       - git-delta
       - jq
@@ -20,3 +22,9 @@
     dest: /usr/bin/bat
     state: link
     force: no
+
+- name: Add vagrant user to docker group
+  user:
+    name: vagrant
+    groups: docker
+    state: present
