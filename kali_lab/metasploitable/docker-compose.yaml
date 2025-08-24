@@ -1,0 +1,19 @@
+# (51:10) https://www.youtube.com/watch?v=y9NhaYH-FV8
+
+# $ docker network ls
+# $ docker network create vulnhunters --attachable --subnet 10.255.255.0/24
+# $ docker pull tleemcjr/metasploitable2
+# $ docker run -it --network vulnhunters --ip 10.255.255.2 --name metasploitable --hostname metasploitable2  tleemcjr/metasploitable2 bash
+# $ { /bin/services.sh }
+
+# ---
+
+services:
+
+  metasploitable:
+    image: tleemcjr/metasploitable2
+    container_name: metasploitable2
+    volumes:
+      - ./tweaks.sh:/tmp/tweaks.sh
+    entrypoint: ["/bin/bash", "/tmp/tweaks.sh"]
+
