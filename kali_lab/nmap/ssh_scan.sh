@@ -1,20 +1,51 @@
 #!/usr/bin/env bash
 
-# -----------------------------------------------------------------------------
-# ssh_scan_new.sh
-# -----------------------------------------------------------------------------
-# 1. load env vars & get targets from list (all lines but those starting with #)
-# 2. scan port 22 for ssh
-# 3. if not found, scan all ports for ssh
-# 4. run safe scans
-# 5. run intrusive scans
-# 6. intrusive scans: attempt to break user:password only if enabled
-# 7. write results
-# -----------------------------------------------------------------------------
-# # ls -la /usr/share/nmap/scripts/ssh* && open https://nmap.org/search/?q=ssh
-# SAFE_SCRIPTS = (ssh2-enum-algos ssh-hostkey)
-# INTRUSIVE_SCRIPTS = (ssh-auth-methods ssh-brute ssh-publickey-acceptance ssh-run)
-# -----------------------------------------------------------------------------
+# =============================================================================
+# SSH SCANNER SCRIPT - Escáner de Seguridad SSH con Nmap
+# =============================================================================
+#
+# DESCRIPCIÓN:
+# Script automatizado para realizar escaneos de seguridad SSH en múltiples
+# objetivos utilizando Nmap. Incluye detección de puertos, análisis de
+# vulnerabilidades y pruebas de fuerza bruta controladas.
+#
+# FUNCIONALIDADES:
+# 1. Carga de variables de entorno y lista de objetivos desde target_list.txt
+# 2. Escaneo del puerto 22 (SSH estándar) en todos los objetivos
+# 3. Escaneo de todos los puertos si SSH no se encuentra en el puerto 22
+# 4. Ejecución de scripts Nmap seguros (no intrusivos)
+# 5. Ejecución de scripts Nmap intrusivos (con precaución)
+# 6. Pruebas de fuerza bruta SSH solo si la autenticación por contraseña está habilitada
+# 7. Generación de reportes detallados con timestamp
+#
+# SCRIPTS NMAP UTILIZADOS:
+# - SEGUROS: ssh2-enum-algos, ssh-hostkey
+# - INTRUSIVOS: ssh-auth-methods, ssh-brute, ssh-publickey-acceptance, ssh-run
+#
+# ARCHIVOS REQUERIDOS:
+# - target_list.txt: Lista de objetivos (una IP/hostname por línea)
+# - common_users.txt: Lista de usuarios para pruebas de fuerza bruta
+# - common_passwords.txt: Lista de contraseñas para pruebas de fuerza bruta
+#
+# SALIDA:
+# - Directorio: ./results/
+# - Archivo: ssh_scan-YYYYMMDD_HHMMSS.log
+#
+# USO:
+# ./ssh_scan.sh
+#
+# NOTAS DE SEGURIDAD:
+# ⚠️  Este script ejecuta escaneos intrusivos que pueden ser detectados
+# ⚠️  Solo usar en entornos autorizados y de pruebas
+# ⚠️  Las pruebas de fuerza bruta pueden causar bloqueos temporales
+# =============================================================================
+#
+# RECURSOS ADICIONALES:
+# - Scripts SSH disponibles: ls -la /usr/share/nmap/scripts/ssh*
+# - Documentación oficial: https://nmap.org/search/?q=ssh
+# - Scripts seguros recomendados: ssh2-enum-algos, ssh-hostkey
+# - Scripts intrusivos: ssh-auth-methods, ssh-brute, ssh-publickey-acceptance, ssh-run
+# =============================================================================
 
 
 do_preparations() {
