@@ -161,6 +161,16 @@ run_intrusive_scripts() {
             echo "  💡 SSH only accepts public key authentication" | tee -a "$OUTPUT_FILE"
         fi
 
+
+        # -----------------------------------------------------------------------------
+        # # - ssh-publickey-acceptance (verificación de claves)
+        # nmap -p 22 --script=ssh-publickey-acceptance "$TARGET" -oN "$OUTPUT_DIR/ssh_pubkey_acceptance_$TIMESTAMP.txt" 2>/dev/null || echo "   ⚠️  ssh-publickey-acceptance falló"
+
+        # # - ssh-run (opcional, requiere credenciales)
+        # nmap -p 22 --script=ssh-run "$TARGET" -oN "$OUTPUT_DIR/ssh_run_$TIMESTAMP.txt" 2>/dev/null || echo "   ⚠️  ssh-run falló (normal sin credenciales)"
+        # -----------------------------------------------------------------------------
+
+
         echo "  ----------------" | tee -a "$OUTPUT_FILE"
     done
 
