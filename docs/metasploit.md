@@ -19,18 +19,44 @@ sudo msfdb status
 ```
 
 ```sh
+# Iniciar consola y ver opciones
 sudo msfconsole # || msfconsole
-
+{
 help
 
 # ---
 
-workspace
+# Listar y crear workspaces
+workspace -l
 # workspace -h
-
 workspace -a test
-# workspace
+# workspace -l
 
+# ---
 
+# Buscar y usar módulos
+search portscan
+use auxiliary/scanner/portscan/tcp
+
+# ---
+
+# Ver opciones, configurar y usar el módulo seleccionado
+options
+set RHOSTS 172.26.10.12
+options
+
+# ---
+
+# Consultar info de los objetivos (según workspace)
+hosts
+services
+  # NOTE: posible integración desde nmap, nexus, etc.
+# vulns
+
+# ---
+
+# Salir de la consola (info queda guardada en la DB)
+exit
+}
 ```
 
