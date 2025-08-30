@@ -9,7 +9,7 @@
 - ansible.builtin.include_tasks: 01-apt.yml
 - ansible.builtin.include_tasks: 02-dotfiles.yml
 - ansible.builtin.include_tasks: 03-zsh.yml
-- ansible.builtin.include_tasks: 04-metasploitable.yml
+# - ansible.builtin.include_tasks: 04-metasploitable.yml
 
 - name: Reboot machine
   reboot:

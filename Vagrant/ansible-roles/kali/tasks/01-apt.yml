@@ -6,8 +6,8 @@
     name:
       - bat
       - eza
-      - docker.io
-      - docker-compose
+      # - docker.io
+      # - docker-compose
       - fzf
       - git-delta
       - jq
@@ -23,8 +23,8 @@
     state: link
     force: no
 
-- name: Add vagrant user to docker group
-  user:
-    name: vagrant
-    groups: docker
-    state: present
+# - name: Add vagrant user to docker group
+#   user:
+#     name: vagrant
+#     groups: docker
+#     state: present

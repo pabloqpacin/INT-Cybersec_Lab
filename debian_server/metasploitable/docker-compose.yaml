@@ -15,14 +15,15 @@ services:
   metasploitable:
     image: tleemcjr/metasploitable2
     container_name: metasploitable2
+    network_mode: host
     volumes:
       - ./tweaks.sh:/tmp/tweaks.sh
     entrypoint: ["/bin/bash", "/tmp/tweaks.sh"]
-    networks:
-      metasploitable_net:
-        ipv4_address: 172.26.10.13
+#     networks:
+#       metasploitable_net:
+#         ipv4_address: 172.26.10.13
 
-networks:
-  metasploitable_net:
-    external: true
+# networks:
+#   metasploitable_net:
+#     external: true
 

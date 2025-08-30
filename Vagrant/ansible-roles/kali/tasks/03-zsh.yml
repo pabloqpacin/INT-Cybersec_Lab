@@ -29,12 +29,12 @@
         tmux new -s $(pwd | sed 's#.*/##')
       }
 
-      alias dps="docker ps"
-      alias dcdd='docker compose down --rmi local -v --remove-orphans'
-      alias dcd="docker compose down"
-      alias dcu="docker compose up"
-      alias dcl="docker compose logs"
-      alias dcd="docker compose stop"
+      # alias dps="docker ps"
+      # alias dcdd='docker compose down --rmi local -v --remove-orphans'
+      # alias dcd="docker compose down"
+      # alias dcu="docker compose up"
+      # alias dcl="docker compose logs"
+      # alias dcd="docker compose stop"
     owner: vagrant
     group: vagrant
     mode: '0644'
