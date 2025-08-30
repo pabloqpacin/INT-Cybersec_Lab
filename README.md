@@ -48,5 +48,6 @@ docker compose logs -f
 
 ### metasploit
 
-...
+> [!NOTE]
+> [./docs/metasploit.md](/docs/metasploit.md)
 
