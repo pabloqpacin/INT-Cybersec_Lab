@@ -19,8 +19,17 @@ sudo msfdb status
 ```
 
 ```sh
-# msfconsole
-sudo msfconsole
+sudo msfconsole # || msfconsole
+
+help
+
+# ---
+
+workspace
+# workspace -h
+
+workspace -a test
+# workspace
 
 
 ```

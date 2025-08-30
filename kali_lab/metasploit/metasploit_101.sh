@@ -15,6 +15,11 @@ msfdb_pgcli(){
     # pgcli postgres://msf:${MSFDB_PASSWORD}@localhost:5432/msf
 }
 
+msf_workspace(){
+    # if ! msfconsole -q -x "workspace -l; exit" | grep -q "test"; then
+        msfconsole -q -r 01-workspace.rc
+    # fi
+}
 
 # ---
 
@@ -22,5 +27,6 @@ if true; then
     msfdb_init
     # msfdb_pgcli
 
+    msf_workspace
 fi
 
