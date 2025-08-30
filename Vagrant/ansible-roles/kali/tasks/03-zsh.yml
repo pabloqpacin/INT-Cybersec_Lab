@@ -28,17 +28,20 @@
       tn () {
         tmux new -s $(pwd | sed 's#.*/##')
       }
+
+      # alias dps="docker ps"
+      # alias dcdd='docker compose down --rmi local -v --remove-orphans'
+      # alias dcd="docker compose down"
+      # alias dcu="docker compose up"
+      # alias dcl="docker compose logs"
+      # alias dcd="docker compose stop"
     owner: vagrant
     group: vagrant
     mode: '0644'
 
 - name: Append kali-aliases.zsh source to .zshrc
-  blockinfile:
+  lineinfile:
     path: /home/vagrant/.zshrc
-    block: |
-      # Custom Kali ZSH config
-      source ~/kali-aliases.zsh
-    marker: "{mark}"
-    marker_begin: "\n# BEGIN ANSIBLE MANAGED BLOCK - Custom ZSH aliases"
-    marker_end: "# END ANSIBLE MANAGED BLOCK - Custom ZSH aliases"
+    line: 'source ~/kali-aliases.zsh'
     state: present
+    create: no

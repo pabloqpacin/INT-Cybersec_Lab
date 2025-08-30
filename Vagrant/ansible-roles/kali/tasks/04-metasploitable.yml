@@ -1,0 +1,10 @@
+---
+- name: Create custom Docker network for metasploitable
+  community.docker.docker_network:
+    name: metasploitable_net
+    ipam_config:
+      - subnet: 172.26.10.0/24
+    attachable: yes
+    state: present
+
+# TODO: (...) docker compose up -d

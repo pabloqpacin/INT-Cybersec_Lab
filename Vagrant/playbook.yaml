@@ -16,17 +16,26 @@
         line: 'APT::Get::Show-Versions "true";'
         create: true
 
-    - name: Configure /etc/hosts with custom DNS entries
-      blockinfile:
+    - name: Configure /etc/hosts with custom DNS entry (kali.local)
+      lineinfile:
         path: /etc/hosts
-        block: |
-          # Custom DNS entries for home-soc lab
-          172.26.10.11 kali.local
-          172.26.10.12 server.local
-        marker: "{mark}"
-        marker_begin: "\n# BEGIN ANSIBLE MANAGED BLOCK - Custom DNS"
-        marker_end: "# END ANSIBLE MANAGED BLOCK - Custom DNS"
+        line: '172.26.10.11 kali.local'
         state: present
+        create: no
+
+    - name: Configure /etc/hosts with server DNS entry (server.local)
+      lineinfile:
+        path: /etc/hosts
+        line: '172.26.10.12 server.local'
+        state: present
+        create: no
+
+    # - name: Configure /etc/hosts with metasploitable DNS entry (metasploitable.local)
+    #   lineinfile:
+    #     path: /etc/hosts
+    #     line: '172.26.10.13 metasploitable.local'
+    #     state: present
+    #     create: no
 
 - name: Configure Kali Linux machines
   hosts: kali
@@ -39,4 +48,4 @@
   become: true
   roles:
     - docker
-    - server
+    # - debian_server
