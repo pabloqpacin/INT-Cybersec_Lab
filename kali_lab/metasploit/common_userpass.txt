@@ -11,6 +11,7 @@ postgres postgres
 root 123456
 root root
 root toor
+service service
 user user
 test test
 vagrant vagrant

