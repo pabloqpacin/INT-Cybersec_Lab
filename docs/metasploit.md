@@ -217,3 +217,69 @@ cat /var/log/auth.log
 
 
 ## SSH
+
+- Configurar Debian VM SSH para evitar conflictos con el SSH de Metasploitable (OJO: Vagrant's NAT default mapping will not work ($ vagrant port debian-soc-vagrant-vm))
+
+```sh
+# En Debian VM
+
+sudo -i
+
+# ---
+
+ss -tulnp | grep ssh
+
+sed -i 's/^[#]*Port 22/Port 2299/g' /etc/ssh/sshd_config && \
+systemctl restart ssh
+
+ss -tulnp | grep ssh
+
+# ---
+
+cd /lab/metasploitable
+
+docker compose up -d && \
+docker compose logs -f
+```
+
+- Enumeración con nmap
+
+```sh
+nmap -p22 -sV server.local -v
+
+nmap -p22,2299 -sV -sC server.local -v --script=ssh2-enum-algos,ssh-auth-methods,ssh-hostkey
+```
+
+- Enumeración con metasploit
+
+```sh
+# sudo msfconsole
+
+workspace -a ssh
+
+use auxiliary/scanner/ssh/ssh_version
+
+options
+set RHOSTS 172.26.10.12
+
+run
+services
+
+set RPORT 2299
+
+run
+
+services
+vulns
+```
+
+- enumeración con *ssh-audit*
+
+```sh
+sudo apt install -y ssh-audit
+
+ssh-audit server.local -p 22
+
+ssh-audit server.local -p 2299
+```
+
