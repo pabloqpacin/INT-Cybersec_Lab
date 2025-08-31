@@ -64,16 +64,16 @@ do_preparations() {
     # Listas de usuarios y contraseñas
     declare -g -a USERNAMES_LIST
     declare -g -a PASSWORDS_LIST
-    if [[ -f "./common_users.txt" ]]; then
-        USERNAMES_LIST="./common_users.txt"
+    if [[ -f "../common_users.txt" ]]; then
+        USERNAMES_LIST="../common_users.txt"
     else
-        echo -e "WARNING: ./common_users.txt not found. Using default users: root, admin\n"
+        echo -e "WARNING: ../common_users.txt not found. Using default users: root, admin\n"
         USERNAMES_LIST="root, admin"
     fi
-    if [[ -f "./common_passwords.txt" ]]; then
-        PASSWORDS_LIST="./common_passwords.txt"
+    if [[ -f "../common_passwords.txt" ]]; then
+        PASSWORDS_LIST="../common_passwords.txt"
     else
-        echo -e "WARNING: ./common_passwords.txt not found. Using default passwords: password123, password456\n"
+        echo -e "WARNING: ../common_passwords.txt not found. Using default passwords: password123, password456\n"
         PASSWORDS_LIST="password123, password, 1234"
     fi
 
