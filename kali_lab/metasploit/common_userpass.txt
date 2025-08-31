@@ -1,0 +1,16 @@
+admin 123456
+admin admin
+admin password
+anonymous anonymous
+ftp ftp
+guest guest
+msf msf
+msfadmin msfadmin
+postgres password
+postgres postgres
+root 123456
+root root
+root toor
+user user
+test test
+vagrant vagrant
