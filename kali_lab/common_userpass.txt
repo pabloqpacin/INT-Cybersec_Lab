@@ -12,6 +12,6 @@ root 123456
 root root
 root toor
 service service
-user user
 test test
+user user
 vagrant vagrant
